@@ -32,20 +32,19 @@ app.post("/get-kosan", async (req: Request, res) => {
   const recomendationKosan = kosan.filter((k: iKosan) => {
     let match = false;
 
-    if (name && k.name.toLowerCase().includes(name.toLowerCase())) {
-      match = true;
-    }
-    if (priceRange && k.price <= priceRange +100000 && k.price >= priceRange-100000) {
-      match = true;
-    }
+    if (location && k.location.toLowerCase().includes(location.toLowerCase())){
+      if (name && k.name.toLowerCase().includes(name.toLowerCase())) {
+        match = true;
+      }
+      if (priceRange && k.price <= priceRange +100000 && k.price >= priceRange-100000) {
+        match = true;
+      }
 
-    if (location && k.location.toLowerCase().includes(location.toLowerCase())) {
-      match = true;
-    }
-    if (facility && k.facility.toLowerCase().includes(facility.toLowerCase())){
-      match = true;
-    }
 
+      if (facility && k.facility.toLowerCase().includes(facility.toLowerCase())){
+        match = true;
+      }
+    }
     return match;
   });
 

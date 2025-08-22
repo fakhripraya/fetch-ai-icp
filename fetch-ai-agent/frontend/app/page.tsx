@@ -85,6 +85,7 @@ export default function ChatPage() {
       const response: ChatApiResponse = await axios.post("http://localhost:8001/chat/submit", {
         text: inputMessage,
       });
+      console.log("response", response)
       const images = processImages(response.resultArray)
 
       const botMessage: ChatMessage = {
