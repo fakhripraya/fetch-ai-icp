@@ -1,0 +1,111 @@
+/* MultiUpload Component Styles */
+.multi-upload-picture-box {
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #2a2a2a; /* Darker background for the box */
+  border: 1px solid #444444;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.multi-upload-picture-field {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.multi-upload-dropzone-container {
+  width: 100%;
+}
+
+.multi-upload-dropzone-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px;
+  border: 2px dashed #555555;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: border-color 0.2s ease-in-out;
+}
+
+.multi-upload-dropzone-box:hover {
+  border-color: #777777;
+}
+
+.multi-upload-custom-typography {
+  font-size: 1rem;
+  color: #cccccc;
+  text-align: center;
+}
+
+.breakline {
+  margin: 10px 0;
+}
+
+.multi-upload-icon-img {
+  width: 60px;
+  height: 60px;
+  margin-bottom: 10px;
+}
+
+.multi-upload-picture-list h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+  color: #e0e0e0;
+}
+
+.multi-upload-file-list-container {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #333333;
+  border-radius: 6px;
+  padding: 10px 15px;
+  margin-bottom: 10px;
+  gap: 10px;
+}
+
+.multi-upload-file-list {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  list-style: none; /* Remove default list style */
+  margin: 0;
+  padding: 0;
+  flex-grow: 1;
+}
+
+.multi-upload-file-img {
+  width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.multi-upload-file-text {
+  font-size: 0.9rem;
+  color: #ffffff;
+  word-break: break-all; /* Allow long file names to break */
+}
+
+.multi-upload-button {
+  background-color: #dc3545; /* Red background for delete button */
+  color: white;
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.multi-upload-button:hover {
+  background-color: #c82333;
+}
+
+.multi-upload-button-text {
+  margin: 0 !important; /* Override any default margin */
+}
