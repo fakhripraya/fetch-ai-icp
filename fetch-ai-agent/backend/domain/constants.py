@@ -6,10 +6,11 @@ ASI1_HEADERS = {
     "Content-Type": "application/json"
 }
 
-CANISTER_ID = "uzt4z-lp777-77774-qaabq-cai"
+
+CANISTER_ID = "uxrrr-q7777-77774-qaaaq-cai"
 BASE_URL = "http://127.0.0.1:4943"
 
-CANISTER_URI = 'http://uzt4z-lp777-77774-qaabq-cai.raw.localhost:4943'
+CANISTER_URI = 'http://uxrrr-q7777-77774-qaaaq-cai.raw.localhost:4943'
 
 HEADERS = {
     "Host": f"{CANISTER_ID}.localhost",

@@ -4,7 +4,6 @@ import express, { Request } from "express";
 import { kosan } from './const/kosan';
 import { Kosan as iKosan }  from './interface/kosan';
 
-// Dummy values instead of real Bitcoin interactions
 const NETWORK: bitcoin_network = { testnet: null };
 const DERIVATION_PATH: Uint8Array[] = [];
 const KEY_NAME: string = "test_key_1";
@@ -12,7 +11,7 @@ const KEY_NAME: string = "test_key_1";
 const app = express();
 app.use(express.json());
 
-/// Dummy: Returns the balance of a given Bitcoin address.
+
 app.get("/", async (req: Request, res) => {
     const response = {
       success: true,
@@ -24,7 +23,7 @@ app.get("/", async (req: Request, res) => {
 
 
 
-/// Dummy: Returns the balance of a given Bitcoin address.
+/// get data kosan
 app.post("/get-kosan", async (req: Request, res) => {
   const { name, priceRange, location, facility } = req.body;
 

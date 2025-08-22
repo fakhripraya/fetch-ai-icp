@@ -8,19 +8,21 @@ from utils.tools import tools
 async def call_icp_endpoint(func_name: str, args: dict, ctx: Context):
     if func_name == "get_boarding_house_details":
         ctx.logger.info(f"Calling get_boarding_house_details with args: {args}")
-        url = f"{CANISTER_URI}/get_kosan"
+        url = f"{CANISTER_URI}/get-kosan"
+        
 
         response = requests.post(url, headers=HEADERS, json=args)
     else:
+
         raise ValueError(f"Unsupported function call: {func_name}")
     
     response.raise_for_status()
 
     # Parse JSON into Building model
-    buildings = [Building.parse_obj(item) for item in response.json()]
-    return buildings
+    return response.json()
 
 async def process_query(query: str, ctx: Context) -> str:
+    res = [] 
     try:
         query = build_prompt(query=query)
 
@@ -58,8 +60,9 @@ async def process_query(query: str, ctx: Context) -> str:
                 ctx.logger.info(f"Executing {func_name} with arguments: {arguments}")
 
                 try:
-                    result = await call_icp_endpoint(func_name, arguments,ctx)
+                    result= await call_icp_endpoint(func_name, arguments,ctx)
                     content_to_send = json.dumps(result)
+                    res = result
                 except Exception as e:
                     error_content = {
                         "error": f"Tool execution failed: {str(e)}",
@@ -88,7 +91,7 @@ async def process_query(query: str, ctx: Context) -> str:
             )
             final_response.raise_for_status()
             final_response_json = final_response.json()
-            return final_response_json["choices"][0]["message"]["content"], result
+            return final_response_json["choices"][0]["message"]["content"], res
         else:
             return response_json["choices"][0]["message"]["content"], []
 
