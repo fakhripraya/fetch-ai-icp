@@ -84693,6 +84693,284 @@ var require_express2 = __commonJS({
   }
 });
 
+// node_modules/object-assign/index.js
+var require_object_assign = __commonJS({
+  "node_modules/object-assign/index.js"(exports4, module) {
+    "use strict";
+    var getOwnPropertySymbols = Object.getOwnPropertySymbols;
+    var hasOwnProperty = Object.prototype.hasOwnProperty;
+    var propIsEnumerable = Object.prototype.propertyIsEnumerable;
+    function toObject2(val) {
+      if (val === null || val === void 0) {
+        throw new TypeError("Object.assign cannot be called with null or undefined");
+      }
+      return Object(val);
+    }
+    function shouldUseNative() {
+      try {
+        if (!Object.assign) {
+          return false;
+        }
+        var test1 = new String("abc");
+        test1[5] = "de";
+        if (Object.getOwnPropertyNames(test1)[0] === "5") {
+          return false;
+        }
+        var test2 = {};
+        for (var i2 = 0; i2 < 10; i2++) {
+          test2["_" + String.fromCharCode(i2)] = i2;
+        }
+        var order2 = Object.getOwnPropertyNames(test2).map(function(n4) {
+          return test2[n4];
+        });
+        if (order2.join("") !== "0123456789") {
+          return false;
+        }
+        var test3 = {};
+        "abcdefghijklmnopqrst".split("").forEach(function(letter) {
+          test3[letter] = letter;
+        });
+        if (Object.keys(Object.assign({}, test3)).join("") !== "abcdefghijklmnopqrst") {
+          return false;
+        }
+        return true;
+      } catch (err3) {
+        return false;
+      }
+    }
+    module.exports = shouldUseNative() ? Object.assign : function(target, source) {
+      var from;
+      var to = toObject2(target);
+      var symbols;
+      for (var s = 1; s < arguments.length; s++) {
+        from = Object(arguments[s]);
+        for (var key in from) {
+          if (hasOwnProperty.call(from, key)) {
+            to[key] = from[key];
+          }
+        }
+        if (getOwnPropertySymbols) {
+          symbols = getOwnPropertySymbols(from);
+          for (var i2 = 0; i2 < symbols.length; i2++) {
+            if (propIsEnumerable.call(from, symbols[i2])) {
+              to[symbols[i2]] = from[symbols[i2]];
+            }
+          }
+        }
+      }
+      return to;
+    };
+  }
+});
+
+// node_modules/cors/lib/index.js
+var require_lib3 = __commonJS({
+  "node_modules/cors/lib/index.js"(exports4, module) {
+    (function() {
+      "use strict";
+      var assign2 = require_object_assign();
+      var vary = require_vary();
+      var defaults = {
+        origin: "*",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        preflightContinue: false,
+        optionsSuccessStatus: 204
+      };
+      function isString2(s) {
+        return typeof s === "string" || s instanceof String;
+      }
+      function isOriginAllowed(origin, allowedOrigin) {
+        if (Array.isArray(allowedOrigin)) {
+          for (var i2 = 0; i2 < allowedOrigin.length; ++i2) {
+            if (isOriginAllowed(origin, allowedOrigin[i2])) {
+              return true;
+            }
+          }
+          return false;
+        } else if (isString2(allowedOrigin)) {
+          return origin === allowedOrigin;
+        } else if (allowedOrigin instanceof RegExp) {
+          return allowedOrigin.test(origin);
+        } else {
+          return !!allowedOrigin;
+        }
+      }
+      function configureOrigin(options, req) {
+        var requestOrigin = req.headers.origin, headers = [], isAllowed;
+        if (!options.origin || options.origin === "*") {
+          headers.push([{
+            key: "Access-Control-Allow-Origin",
+            value: "*"
+          }]);
+        } else if (isString2(options.origin)) {
+          headers.push([{
+            key: "Access-Control-Allow-Origin",
+            value: options.origin
+          }]);
+          headers.push([{
+            key: "Vary",
+            value: "Origin"
+          }]);
+        } else {
+          isAllowed = isOriginAllowed(requestOrigin, options.origin);
+          headers.push([{
+            key: "Access-Control-Allow-Origin",
+            value: isAllowed ? requestOrigin : false
+          }]);
+          headers.push([{
+            key: "Vary",
+            value: "Origin"
+          }]);
+        }
+        return headers;
+      }
+      function configureMethods(options) {
+        var methods = options.methods;
+        if (methods.join) {
+          methods = options.methods.join(",");
+        }
+        return {
+          key: "Access-Control-Allow-Methods",
+          value: methods
+        };
+      }
+      function configureCredentials(options) {
+        if (options.credentials === true) {
+          return {
+            key: "Access-Control-Allow-Credentials",
+            value: "true"
+          };
+        }
+        return null;
+      }
+      function configureAllowedHeaders(options, req) {
+        var allowedHeaders = options.allowedHeaders || options.headers;
+        var headers = [];
+        if (!allowedHeaders) {
+          allowedHeaders = req.headers["access-control-request-headers"];
+          headers.push([{
+            key: "Vary",
+            value: "Access-Control-Request-Headers"
+          }]);
+        } else if (allowedHeaders.join) {
+          allowedHeaders = allowedHeaders.join(",");
+        }
+        if (allowedHeaders && allowedHeaders.length) {
+          headers.push([{
+            key: "Access-Control-Allow-Headers",
+            value: allowedHeaders
+          }]);
+        }
+        return headers;
+      }
+      function configureExposedHeaders(options) {
+        var headers = options.exposedHeaders;
+        if (!headers) {
+          return null;
+        } else if (headers.join) {
+          headers = headers.join(",");
+        }
+        if (headers && headers.length) {
+          return {
+            key: "Access-Control-Expose-Headers",
+            value: headers
+          };
+        }
+        return null;
+      }
+      function configureMaxAge(options) {
+        var maxAge = (typeof options.maxAge === "number" || options.maxAge) && options.maxAge.toString();
+        if (maxAge && maxAge.length) {
+          return {
+            key: "Access-Control-Max-Age",
+            value: maxAge
+          };
+        }
+        return null;
+      }
+      function applyHeaders(headers, res) {
+        for (var i2 = 0, n4 = headers.length; i2 < n4; i2++) {
+          var header = headers[i2];
+          if (header) {
+            if (Array.isArray(header)) {
+              applyHeaders(header, res);
+            } else if (header.key === "Vary" && header.value) {
+              vary(res, header.value);
+            } else if (header.value) {
+              res.setHeader(header.key, header.value);
+            }
+          }
+        }
+      }
+      function cors2(options, req, res, next) {
+        var headers = [], method = req.method && req.method.toUpperCase && req.method.toUpperCase();
+        if (method === "OPTIONS") {
+          headers.push(configureOrigin(options, req));
+          headers.push(configureCredentials(options, req));
+          headers.push(configureMethods(options, req));
+          headers.push(configureAllowedHeaders(options, req));
+          headers.push(configureMaxAge(options, req));
+          headers.push(configureExposedHeaders(options, req));
+          applyHeaders(headers, res);
+          if (options.preflightContinue) {
+            next();
+          } else {
+            res.statusCode = options.optionsSuccessStatus;
+            res.setHeader("Content-Length", "0");
+            res.end();
+          }
+        } else {
+          headers.push(configureOrigin(options, req));
+          headers.push(configureCredentials(options, req));
+          headers.push(configureExposedHeaders(options, req));
+          applyHeaders(headers, res);
+          next();
+        }
+      }
+      function middlewareWrapper(o3) {
+        var optionsCallback = null;
+        if (typeof o3 === "function") {
+          optionsCallback = o3;
+        } else {
+          optionsCallback = function(req, cb) {
+            cb(null, o3);
+          };
+        }
+        return function corsMiddleware(req, res, next) {
+          optionsCallback(req, function(err3, options) {
+            if (err3) {
+              next(err3);
+            } else {
+              var corsOptions = assign2({}, defaults, options);
+              var originCallback = null;
+              if (corsOptions.origin && typeof corsOptions.origin === "function") {
+                originCallback = corsOptions.origin;
+              } else if (corsOptions.origin) {
+                originCallback = function(origin, cb) {
+                  cb(null, corsOptions.origin);
+                };
+              }
+              if (originCallback) {
+                originCallback(req.headers.origin, function(err22, origin) {
+                  if (err22 || !origin) {
+                    next(err22);
+                  } else {
+                    corsOptions.origin = origin;
+                    cors2(corsOptions, req, res, next);
+                  }
+                });
+              } else {
+                next();
+              }
+            }
+          });
+        };
+      }
+      module.exports = middlewareWrapper;
+    })();
+  }
+});
+
 // node_modules/azle/src/stable/lib/state.ts
 globalThis._azleDispatch = (action) => {
   if (globalThis.process !== void 0 && globalThis.process.env.AZLE_LOG_ACTIONS === "true") {
@@ -117883,181 +118161,264 @@ var _mapText = StableBTreeMap(0);
 
 // src/backend/index.ts
 var backend_exports = {};
-__export(backend_exports, {
-  determineKeyName: () => determineKeyName,
-  determineNetwork: () => determineNetwork
-});
 var import_express = __toESM(require_express2());
 
 // src/backend/const/kosan.ts
 var kosan = [
   {
+    "id": "kos-Mawar-Indah",
     "name": "kos Mawar Indah",
     "price": 12e5,
     "location": "Depok, margonda x1",
-    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Motor"
+    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"],
+    "fullDescription": "Kosan campur yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Mawar-Indah-2",
     "name": "kos Mawar Indah 2",
     "price": 11e5,
     "location": "Depok, margonda x2",
-    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Motor"
+    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Mawar-Indah-3",
     "name": "kos Mawar Indah 3",
     "price": 13e5,
     "location": "Depok, margonda x2",
-    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Motor"
+    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Melati-Asri",
     "name": "kos Melati Asri",
-    "price": 15e5,
     "location": "Jakarta Selatan, pondok indah 2 nomor 15",
-    "facility": "WiFi, AC, Kamar Mandi Luar, Dapur Bersama"
+    "price": 15e5,
+    "facility": "WiFi, AC, Kamar Mandi Luar, Dapur Bersama",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan campur yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Anggrek-Putih",
     "name": "kos Anggrek Putih",
     "price": 1e6,
-    "location": "Bandung, pasteur block 5",
-    "facility": "Kipas Angin, Parkir Motor, Dapur Bersama"
+    "location": "tangerang selatan, pasteur block 5",
+    "facility": "Kipas Angin, Parkir Motor, Dapur Bersama",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Sakura",
     "name": "kos Sakura",
     "price": 18e5,
-    "location": "Surabaya, jalan pahlawan nomor 10",
-    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Mobil, Laundry"
+    "location": "bekasi utara, jalan pahlawan nomor 10",
+    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Mobil, Laundry",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Kembang",
     "name": "kos Kembang",
     "price": 1e6,
-    "location": "Malang, jalan tidur suka makmur nomor 8",
-    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Mobil, Laundry"
+    "location": "bekasi selatan, jalan tidur suka makmur nomor 8",
+    "facility": "WiFi, Kamar Mandi Dalam, AC, Parkir Mobil, Laundry",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Flamboyan",
     "name": "kos Flamboyan",
     "price": 13e5,
-    "location": "Yogyakarta, jalan kaliurang km 5",
-    "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor, CCTV"
+    "location": "jakarta timur, jalan kaliurang km 5",
+    "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor, CCTV",
+    "images": ["https://kostjakarta.net/uploads/2025/07/825636.jpg", "https://kostjakarta.net/uploads/2025/07/818175.jpg", "https://kostjakarta.net/uploads/2025/07/923373.jpg"],
+    "fullDescription": "Kosan campur yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Teratai-Biru",
     "name": "kos Teratai Biru",
     "price": 2e6,
-    "location": "Jakarta Pusat, menteng raya blok A",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil, Security 24 Jam"
+    "location": "Jakarta barat, menteng raya blok A",
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil, Security 24 Jam",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Cemara-Hijau",
     "name": "kos Cemara Hijau",
     "price": 9e5,
-    "location": "Semarang, jalan pandanaran no. 12",
-    "facility": "Kipas Angin, Kamar Mandi Luar, Parkir Motor"
+    "location": "jakarta selatan, jalan pandanaran no. 12",
+    "facility": "Kipas Angin, Kamar Mandi Luar, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Kenanga",
     "name": "kos Kenanga",
     "price": 17e5,
     "location": "Bekasi, jalan cut mutia kavling 3",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil"
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil",
+    "images": ["https://kostjakarta.net/uploads/2025/01/857932-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/633904-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/643553-scaled.jpg"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Bougenville",
     "name": "kos Bougenville",
     "price": 11e5,
-    "location": "Medan, jalan gatot subroto no. 25",
-    "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor"
+    "location": "jakarta pusat, jalan gatot subroto no. 25",
+    "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Dahlia",
     "name": "kos Dahlia",
     "price": 125e4,
-    "location": "Palembang, jalan veteran blok D",
-    "facility": "WiFi, AC, Parkir Motor, Laundry"
+    "location": "PIK, jalan veteran blok D",
+    "facility": "WiFi, AC, Parkir Motor, Laundry",
+    "images": ["https://kostjakarta.net/uploads/2025/01/857932-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/633904-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/643553-scaled.jpg"],
+    "fullDescription": "Kosan perempuan yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Kemuning",
     "name": "kos Kemuning",
     "price": 14e5,
-    "location": "Makassar, jalan sungai saddang no. 7",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Dapur Bersama"
+    "location": "tanggerang, jalan sungai saddang no. 7",
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Dapur Bersama",
+    "fullDescription": "Kosan campur yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/01/857932-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/633904-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/643553-scaled.jpg"]
   },
   {
+    "id": "kos-Seruni",
     "name": "kos Seruni",
     "price": 95e4,
-    "location": "Cirebon, jalan kartini no. 18",
-    "facility": "Kipas Angin, Kamar Mandi Luar, Parkir Motor"
+    "location": "bogor, jalan kartini no. 18",
+    "facility": "Kipas Angin, Kamar Mandi Luar, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"]
   },
   {
+    "id": "kos-Edelweis",
     "name": "kos Edelweis",
     "price": 21e5,
-    "location": "Balikpapan, jalan sudirman kavling 2",
-    "facility": "WiFi, AC, Parkir Mobil, Security 24 Jam, Laundry"
+    "location": "jakarta pusat, jalan sudirman kavling 2",
+    "facility": "WiFi, AC, Parkir Mobil, Security 24 Jam, Laundry",
+    "fullDescription": "Kosan campur yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/01/857932-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/633904-scaled.jpg", "https://kostjakarta.net/uploads/2025/01/643553-scaled.jpg"]
   },
   {
+    "id": "kos-Lavender",
     "name": "kos Lavender",
     "price": 16e5,
-    "location": "Denpasar, jalan diponegoro no. 45",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Motor"
+    "location": "jakarta selatan, jalan diponegoro no. 45",
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Motor",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"]
   },
   {
+    "id": "kos-Mawar-Putih",
     "name": "kos Mawar Putih",
     "price": 1e6,
-    "location": "Pontianak, jalan ahmad yani no. 33",
-    "facility": "Kipas Angin, Parkir Motor, Kamar Mandi Luar"
+    "location": "jakarta utara, jalan ahmad yani no. 33",
+    "facility": "Kipas Angin, Parkir Motor, Kamar Mandi Luar",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/01/987954.jpg", "https://kostjakarta.net/uploads/2025/01/223663.jpg", "https://kostjakarta.net/uploads/2025/01/2346.jpg", "https://kostjakarta.net/uploads/2025/01/747713.jpg"]
   },
   {
+    "id": "kos-Angsana",
     "name": "kos Angsana",
     "price": 135e4,
-    "location": "Batam, jalan nagoya plaza blok B",
+    "location": "bogor, jalan nagoya plaza blok B",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"],
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
     "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor"
   },
   {
+    "id": "kos-Pinus-Asri",
     "name": "kos Pinus Asri",
     "price": 19e5,
-    "location": "Bandar Lampung, jalan zainal abidin no. 8",
-    "facility": "WiFi, AC, Parkir Mobil, Laundry, Security 24 Jam"
+    "location": "depok, jalan zainal abidin no. 8",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "facility": "WiFi, AC, Parkir Mobil, Laundry, Security 24 Jam",
+    "images": ["https://kostjakarta.net/uploads/2025/01/987954.jpg", "https://kostjakarta.net/uploads/2025/01/223663.jpg", "https://kostjakarta.net/uploads/2025/01/2346.jpg", "https://kostjakarta.net/uploads/2025/01/747713.jpg"]
   },
   {
+    "id": "kos-Cempaka-Wangi",
     "name": "kos Cempaka Wangi",
     "price": 15e5,
-    "location": "Tangerang, jalan sudirman raya kav. 9",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Dapur Bersama"
+    "location": "depok, jalan sudirman raya kav. 9",
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Dapur Bersama",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/01/987954.jpg", "https://kostjakarta.net/uploads/2025/01/223663.jpg", "https://kostjakarta.net/uploads/2025/01/2346.jpg", "https://kostjakarta.net/uploads/2025/01/747713.jpg"]
   },
   {
+    "id": "kos-Beringin",
     "name": "kos Beringin",
     "price": 115e4,
-    "location": "Padang, jalan minangkabau no. 21",
-    "facility": "WiFi, Parkir Motor, Laundry"
+    "location": "jakarta pusat, jalan minangkabau no. 21",
+    "facility": "WiFi, Parkir Motor, Laundry",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum."
   },
   {
+    "id": "kos-Anggrek-Merah",
     "name": "kos Anggrek Merah",
     "price": 175e4,
-    "location": "Manado, jalan sam ratulangi blok E",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil"
+    "location": "jakarta pusat, jalan sam ratulangi blok E",
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"]
   },
   {
+    "id": "kos-Sejahtera",
     "name": "kos Sejahtera",
     "price": 105e4,
-    "location": "Solo, jalan slamet riyadi no. 99",
-    "facility": "WiFi, Parkir Motor, Kamar Mandi Dalam"
+    "location": "jakarta selatan, jalan slamet riyadi no. 99",
+    "facility": "WiFi, Parkir Motor, Kamar Mandi Dalam",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/01/987954.jpg", "https://kostjakarta.net/uploads/2025/01/223663.jpg", "https://kostjakarta.net/uploads/2025/01/2346.jpg", "https://kostjakarta.net/uploads/2025/01/747713.jpg"]
   },
   {
+    "id": "kos-Gading-Residence",
     "name": "kos Gading Residence",
     "price": 22e5,
     "location": "Jakarta Utara, kelapa gading boulevard",
-    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil, Security 24 Jam"
+    "facility": "WiFi, AC, Kamar Mandi Dalam, Parkir Mobil, Security 24 Jam",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/04/585134-scaled.jpeg", "https://kostjakarta.net/uploads/2025/04/421271.jpeg", "https://kostjakarta.net/uploads/2025/04/730852.jpeg", "https://kostjakarta.net/uploads/2025/04/547743.jpeg", "https://kostjakarta.net/uploads/2025/04/313066.jpeg"]
   },
   {
+    "id": "kos-Taman-Sari",
     "name": "kos Taman Sari",
     "price": 95e4,
     "location": "Bogor, jalan pajajaran no. 56",
-    "facility": "Kipas Angin, Kamar Mandi Luar, Parkir Motor"
+    "facility": "Kipas Angin, Kamar Mandi Luar, Parkir Motor",
+    "fullDescription": "Kosan pria yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
+    "images": ["https://kostjakarta.net/uploads/2025/07/500041.png", "https://kostjakarta.net/uploads/2025/07/266794-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/571620-scaled.jpg", "https://kostjakarta.net/uploads/2025/07/377446.png", "https://kostjakarta.net/uploads/2025/07/473773.png"]
   },
   {
+    "id": "kos-Alamanda",
     "name": "kos Alamanda",
     "price": 13e5,
-    "location": "Purwokerto, jalan prof. soeharso blok A",
-    "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor"
+    "location": "bogor, jalan prof. soeharso blok A",
+    "facility": "WiFi, Kamar Mandi Dalam, Parkir Motor",
+    "images": ["https://kostjakarta.net/uploads/2025/01/987954.jpg", "https://kostjakarta.net/uploads/2025/01/223663.jpg", "https://kostjakarta.net/uploads/2025/01/2346.jpg", "https://kostjakarta.net/uploads/2025/01/747713.jpg"]
   }
 ];
 
 // src/backend/index.ts
 var app = (0, import_express.default)();
+var cors = require_lib3();
 app.use(import_express.default.json());
+app.use(
+  cors({
+    origin: "*",
+    credentials: true,
+    optionsSuccessStatus: 200
+    // some legacy browsers (IE11, various SmartTVs) choke on 204
+  })
+);
 app.get("/", async (req, res) => {
   const response = {
     success: true,
@@ -118065,35 +118426,40 @@ app.get("/", async (req, res) => {
   };
   res.json(response);
 });
-app.post("/get-kosan", async (req, res) => {
-  const { name, priceRange, location, facility } = req.body;
-  console.log("masukk ", { name, priceRange, location, facility });
-  const recomendationKosan = kosan.filter((k2) => {
+app.post("/kosan", async (req, res) => {
+  const object2 = req.body;
+  console.log("isi object", object2);
+  const recommendationKosan = kosan.filter((k2) => {
     let match = false;
-    if (location && k2.location.toLowerCase().includes(location.toLowerCase())) {
-      if (name && k2.name.toLowerCase().includes(name.toLowerCase())) {
+    if (object2.location && k2.location.toLowerCase().includes(object2.location.toLowerCase())) {
+      if (object2.name && k2.name.toLowerCase().includes(object2.name.toLowerCase())) {
         match = true;
       }
-      if (priceRange && k2.price <= priceRange + 1e5 && k2.price >= priceRange - 1e5) {
+      if (object2.priceRange && k2.price <= object2.priceRange + 1e5 && k2.price >= object2.priceRange - 1e5) {
         match = true;
       }
-      if (facility && k2.facility.toLowerCase().includes(facility.toLowerCase())) {
+      if (object2.facility && k2.facility.toLowerCase().includes(object2.facility.toLowerCase())) {
         match = true;
       }
     }
     return match;
   });
-  console.log("darderdor. : ", recomendationKosan);
-  res.status(200).json(recomendationKosan);
+  console.log("isi rekomendasi : ", recommendationKosan);
+  res.status(200).json(recommendationKosan);
+});
+app.get("/kosan", async (req, res) => {
+  const { id: id2 } = req.query;
+  if (!id2) {
+    return res.status(400).json({ message: "id is required" });
+  }
+  const kosanDetail = kosan.find((k2) => k2.id === id2);
+  if (!kosanDetail) {
+    return res.status(404).json({ message: "kosan not found" });
+  }
+  res.status(200).json(kosanDetail);
 });
 app.use(import_express.default.static("/dist"));
 app.listen();
-function determineKeyName(network) {
-  return "test_key_1";
-}
-function determineNetwork(networkName) {
-  return { testnet: null };
-}
 
 // <stdin>
 ethers_exports.FetchRequest.registerGetUrl(ethersGetUrl);
@@ -118520,6 +118886,13 @@ serve-static/index.js:
    * Copyright(c) 2014-2016 Douglas Christopher Wilson
    * MIT Licensed
    *)
+
+object-assign/index.js:
+  (*
+  object-assign
+  (c) Sindre Sorhus
+  @license MIT
+  *)
 
 @noble/hashes/esm/utils.js:
 @noble/hashes/esm/utils.js:

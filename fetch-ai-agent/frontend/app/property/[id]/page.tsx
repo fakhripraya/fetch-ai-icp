@@ -5,6 +5,9 @@ import { useParams, useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft, MapPin, Phone, MessageCircle } from "lucide-react"
+import axios from "axios";
+import { config } from "@/lib/config"
+import { formatToIDR } from "@/lib/utils"
 
 interface PropertyDetails {
   id: string
@@ -51,150 +54,70 @@ interface PropertyDetails {
 // Mock function to fetch property details
 const fetchPropertyDetails = async (id: string): Promise<PropertyDetails> => {
   // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 1000))
+  const responseData = await axios.post(`${config.agentApiUrl}/kosan`, {
+    idKosan: id,
+    });
+
+  console.log("isi res", responseData)
+  const response = responseData.data.result
 
   // Mock data based on property ID
-  const mockProperties: Record<string, PropertyDetails> = {
-    "hunian-jalan-dwifisya": {
-      id: "hunian-jalan-dwifisya",
-      title: "Hunian Jalan Dwifisya II",
-      price: "Rp 900,000",
-      priceNumeric: 900000,
-      description: "Fasilitas: Kasur, lemari, kamar mandi dalam.",
-      fullDescription:
-        "Kosan campur yang nyaman dengan fasilitas lengkap. Lokasi strategis dekat dengan berbagai fasilitas umum. Cocok untuk mahasiswa dan pekerja muda. Lingkungan aman dan bersih dengan akses mudah ke transportasi umum.",
-      images: [
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-UOMYe6FOnaBdqvpXtFkuwX75ynkHSg.png",
-        "/placeholder.svg?height=400&width=600&text=Room+Interior",
-        "/placeholder.svg?height=400&width=600&text=Bathroom",
-        "/placeholder.svg?height=400&width=600&text=Common+Area",
-        "/placeholder.svg?height=400&width=600&text=Building+Exterior",
-      ],
-      location: {
-        address: "Jl. Dwifisya II No. 15, Tanah Kusir",
-        district: "Kebayoran Lama",
-        city: "Jakarta Selatan",
-        latitude: -6.2441,
-        longitude: 106.7713,
-      },
-      facilities: [
-        "Kasur",
-        "Lemari",
-        "Kamar Mandi Dalam",
-        "WiFi",
-        "Listrik Termasuk",
-        "Air Termasuk",
-        "Keamanan 24 Jam",
-        "Parkir Motor",
-      ],
-      specifications: {
-        roomCount: 20,
-        roomSize: "3x4 meter",
-        buildingType: "Kosan Campur",
-        gender: "Campur",
-        deposit: "Rp 900,000 (1 bulan)",
-        minimumStay: "3 bulan",
-      },
-      contact: {
-        phone: "081234567890",
-        whatsapp: "081234567890",
-        owner: "Ibu Sari",
-      },
-      nearbyPlaces: [
-        { name: "Halte Busway Tanah Kusir", distance: "200m", type: "transport" },
-        { name: "Indomaret", distance: "150m", type: "shop" },
-        { name: "Warung Makan Sederhana", distance: "100m", type: "food" },
-        { name: "ATM BCA", distance: "300m", type: "bank" },
-        { name: "Apotek Kimia Farma", distance: "250m", type: "health" },
-      ],
-      rules: [
-        "Dilarang membawa hewan peliharaan",
-        "Jam malam pukul 22.00 WIB",
-        "Tamu maksimal sampai pukul 21.00 WIB",
-        "Dilarang merokok di dalam kamar",
-        "Wajib menjaga kebersihan bersama",
-      ],
-      availability: {
-        available: true,
-        availableRooms: 3,
-        totalRooms: 20,
-      },
+  const propertyDetails: PropertyDetails = {
+    id: response.id,
+    title: response.name,
+    price: formatToIDR(response.price),
+    priceNumeric: response.price,
+    description: response.fullDescription.split(".")[0] + ".",
+    fullDescription: response.fullDescription,
+    images: response.images,
+    location: {
+      address: response.location,
+      district: "",
+      city: "",
+      latitude: -6.2297,
+      longitude: 106.7957,
     },
-    "kost-yuugen": {
-      id: "kost-yuugen",
-      title: "KOST YUUGEN FOR THE BOYS",
-      price: "Rp 1,500,000",
-      priceNumeric: 1500000,
-      description: "Fasilitas: AC, kasur springbed, meja belajar, kamar mandi dalam.",
-      fullDescription:
-        "Kost khusus pria dengan fasilitas premium. Dilengkapi dengan AC, kasur springbed berkualitas, dan meja belajar. Lokasi strategis dengan akses mudah ke berbagai tempat. Lingkungan aman dan nyaman untuk mahasiswa dan pekerja.",
-      images: [
-        "https://hebbkx1anhila5yf.public.blob.vercel-storage.com/image-5CJmRcAbYa2wJj6gEk7LPGx02DasxD.png",
-        "/placeholder.svg?height=400&width=600&text=AC+Room",
-        "/placeholder.svg?height=400&width=600&text=Study+Desk",
-        "/placeholder.svg?height=400&width=600&text=Springbed",
-        "/placeholder.svg?height=400&width=600&text=Modern+Bathroom",
-      ],
-      location: {
-        address: "Jl. Yuugen Raya No. 88, Kebayoran Baru",
-        district: "Kebayoran Baru",
-        city: "Jakarta Selatan",
-        latitude: -6.2297,
-        longitude: 106.7957,
-      },
-      facilities: [
-        "AC",
-        "Kasur Springbed",
-        "Meja Belajar",
-        "Kursi",
-        "Lemari",
-        "Kamar Mandi Dalam",
-        "Water Heater",
-        "WiFi",
-        "Listrik Termasuk",
-        "Air Termasuk",
-        "Keamanan 24 Jam",
-        "CCTV",
-        "Parkir Motor",
-        "Laundry Service",
-      ],
-      specifications: {
-        roomCount: 15,
-        roomSize: "4x5 meter",
-        buildingType: "Kosan Pria",
-        gender: "Pria",
-        deposit: "Rp 1,500,000 (1 bulan)",
-        minimumStay: "6 bulan",
-      },
-      contact: {
-        phone: "081987654321",
-        whatsapp: "081987654321",
-        owner: "Pak Yuugen",
-      },
-      nearbyPlaces: [
-        { name: "Stasiun MRT Blok M", distance: "500m", type: "transport" },
-        { name: "Blok M Plaza", distance: "600m", type: "shop" },
-        { name: "McDonald's", distance: "400m", type: "food" },
-        { name: "Bank Mandiri", distance: "300m", type: "bank" },
-        { name: "RS Fatmawati", distance: "1.2km", type: "health" },
-      ],
-      rules: [
-        "Khusus pria",
-        "Jam malam pukul 23.00 WIB",
-        "Tamu maksimal sampai pukul 22.00 WIB",
-        "Dilarang merokok di dalam kamar",
-        "Wajib menjaga kebersihan",
-        "Dilarang membawa alkohol",
-      ],
-      availability: {
-        available: true,
-        availableRooms: 4,
-        totalRooms: 15,
-      },
+    facilities: response.facility
+    ? response.facility
+        .split(",")
+        .map((f: string) => f.trim())
+    : [],
+    specifications: {
+      roomCount: 15,
+      roomSize: "4x5 meter",
+      buildingType: "Boarding House",
+      gender: "All Gender",
+      deposit: formatToIDR(300000),
+      minimumStay: "6 Months",
+    },
+    contact: {
+      phone: "08123456789",
+      whatsapp: "08123456789",
+      owner: "Bagus",
+    },
+    nearbyPlaces: [
+      { name: "Stasiun MRT Blok M", distance: "500m", type: "transport" },
+      { name: "Blok M Plaza", distance: "600m", type: "shop" },
+      { name: "McDonald's", distance: "400m", type: "food" },
+      { name: "Bank Mandiri", distance: "300m", type: "bank" },
+      { name: "RS Fatmawati", distance: "1.2km", type: "health" },
+    ],
+    rules: [
+      "All Gender",
+      "Night hour max 23.00 PM",
+      "Guest hour max 22.00 PM",
+      "No smoking inside the room",
+      "Keep the cleanliness",
+      "No alcohol",
+    ],
+    availability: {
+      available: true,
+      availableRooms: 4,
+      totalRooms: 15,
     },
   }
 
-  return mockProperties[id] || mockProperties["hunian-jalan-dwifisya"]
+  return propertyDetails
 }
 
 export default function PropertyDetailPage() {
@@ -235,7 +158,7 @@ export default function PropertyDetailPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#0C0C0D] text-white flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto mb-4"></div>
           <p>Loading property details...</p>
@@ -246,7 +169,7 @@ export default function PropertyDetailPage() {
 
   if (!property) {
     return (
-      <div className="min-h-screen bg-[#1a1a1a] text-white flex items-center justify-center">
+      <div className="min-h-screen bg-[#0C0C0D] text-white flex items-center justify-center">
         <div className="text-center">
           <p className="text-xl mb-4">Property not found</p>
           <Button onClick={() => router.back()} className="bg-green-600 hover:bg-green-700">
@@ -258,9 +181,9 @@ export default function PropertyDetailPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1a1a1a] text-white">
+    <div className="min-h-screen bg-[#0C0C0D] text-white">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-[#1a1a1a] border-b border-[#333333] p-4">
+      <header className="sticky top-0 z-10 bg-[#0C0C0D] border-b border-[#333333] p-4">
         <div className="flex items-center justify-between max-w-6xl mx-auto">
           <Button onClick={() => router.back()} variant="ghost" className="text-white hover:bg-[#333333] p-2">
             <ArrowLeft className="h-5 w-5 mr-2" />

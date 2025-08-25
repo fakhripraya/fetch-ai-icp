@@ -8,9 +8,13 @@ from utils.tools import tools
 async def call_icp_endpoint(func_name: str, args: dict, ctx: Context):
     if func_name == "get_boarding_house_details":
         ctx.logger.info(f"Calling get_boarding_house_details with args: {args}")
-        url = f"{CANISTER_URI}/get-kosan"
-        
-
+        url = f"{CANISTER_URI}/kosan"
+        if "priceRange" in args and isinstance(args["priceRange"], str):
+            try:
+                args["priceRange"] = int(args["priceRange"])
+            except ValueError:
+                ctx.logger.warning("priceRange is not a valid int, leaving as is")
+        ctx.logger.info(f'get number : {args["priceRange"]}')
         response = requests.post(url, headers=HEADERS, json=args)
     else:
 
@@ -21,8 +25,26 @@ async def call_icp_endpoint(func_name: str, args: dict, ctx: Context):
     # Parse JSON into Building model
     return response.json()
 
+
+async def call_get_kosan(query: str, ctx):
+    # build URL with query params
+    url = f"{CANISTER_URI}/kosan?id={query}"
+
+    ctx.logger.info(f"Calling get_kosan with args: {query} and uri = {url}")
+
+    try:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        # return parsed JSON
+        ctx.logger.info(f"isi data {response.json()}")
+        return response.json()
+
+    except requests.RequestException as e:
+        raise ValueError(f"Error fetching kosan data: {e}")
+
 async def process_query(query: str, ctx: Context) -> str:
-    res = [] 
+    result = [] 
     try:
         query = build_prompt(query=query)
 
@@ -62,7 +84,6 @@ async def process_query(query: str, ctx: Context) -> str:
                 try:
                     result= await call_icp_endpoint(func_name, arguments,ctx)
                     content_to_send = json.dumps(result)
-                    res = result
                 except Exception as e:
                     error_content = {
                         "error": f"Tool execution failed: {str(e)}",
@@ -91,7 +112,7 @@ async def process_query(query: str, ctx: Context) -> str:
             )
             final_response.raise_for_status()
             final_response_json = final_response.json()
-            return final_response_json["choices"][0]["message"]["content"], res
+            return final_response_json["choices"][0]["message"]["content"], result
         else:
             return response_json["choices"][0]["message"]["content"], []
 
@@ -103,14 +124,17 @@ def build_prompt(query: str) -> str:
     return f"""
 You are an assistant specialized in helping users find boarding houses.
 When a user asks about a boarding house, you MUST call the provided tool 
-`get_boarding_house_building_details` to retrieve details such as facilities, 
-pricing, and owner contact details. 
+`get_boarding_house_building_details` to retrieve details such as facilities if the user doesnt provide the facilities then dont ask it, 
+pricing(for pricing its only use rupiah), and owner contact details. 
 
-If the user provides an address (or partial address), use it in the tool call.
+If the user provides an address (or partial address), use it in the tool call otherwise dont ask again.
 If the name or price range is mentioned, include them as well.
+so if the user doest provide it just get the data they provide
 
 Always respond with tool calls first, and only summarize or answer after 
 tool results are received.
-after you get data make sure you good simple html like <li> <ul> etc 
+
+btw if user use english then answer english and if user use indonesia then use indonesia
+
 User query: {query}
 """

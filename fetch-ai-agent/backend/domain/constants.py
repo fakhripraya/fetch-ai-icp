@@ -1,16 +1,23 @@
-# ASI1 API settings
-ASI1_API_KEY = ""  # Replace with your ASI1 key
-ASI1_BASE_URL = "https://api.asi1.ai/v1"
+import os
+from dotenv import load_dotenv
+
+
+load_dotenv()
+
+
+ASI1_API_KEY = os.getenv("ASI1_API_KEY")
+ASI1_BASE_URL = os.getenv("ASI1_BASE_URL")
+
 ASI1_HEADERS = {
     "Authorization": f"Bearer {ASI1_API_KEY}",
     "Content-Type": "application/json"
 }
 
 
-CANISTER_ID = "uxrrr-q7777-77774-qaaaq-cai"
-BASE_URL = "http://127.0.0.1:4943"
 
-CANISTER_URI = 'http://uxrrr-q7777-77774-qaaaq-cai.raw.localhost:4943'
+CANISTER_ID = os.getenv("CANISTER_ID")
+BASE_URL = os.getenv("BASE_URL")
+CANISTER_URI = os.getenv("CANISTER_URI")
 
 HEADERS = {
     "Host": f"{CANISTER_ID}.localhost",

@@ -5,7 +5,7 @@ import { Label } from "@/components/ui/label"
 
 export default function AddProductForm() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-[#1a1a1a] text-white p-6">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-[#0C0C0D] text-white p-6">
       <div className="w-full max-w-2xl bg-[#2a2a2a] rounded-lg shadow-lg p-8">
         <h1 className="text-3xl font-bold text-center mb-8">Add New Product</h1>
 

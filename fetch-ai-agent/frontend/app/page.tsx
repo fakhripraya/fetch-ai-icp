@@ -3,10 +3,11 @@
 import type React from "react"
 import axios from "axios";
 import { useState } from "react"
-import { Menu, RefreshCw, Home, Send } from "lucide-react"
+import { Menu, Home, Send } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { useRouter } from "next/navigation"
+import { config } from "@/lib/config";
 
 interface PropertyImage {
   id: string
@@ -32,18 +33,26 @@ interface ChatApiResponse {
 }
 
 export interface IKosanDBObject {
+  id:string;
   name: string;
   price: number;
   facility: string;
   location: string;
+  images:string;
 }
 
 // Mock function to simulate backend response
 const processImages = (kosanArray: IKosanDBObject[]): PropertyImage[] => {
+  // link gambar 
+  var randomImage = ['https://apollo.olx.co.id/v1/files/6796f09430a26-ID/image;s=780x0;q=60',
+    'https://apollo.olx.co.id/v1/files/6892ada656da2-ID/image;s=780x0;q=60',
+    'https://apollo.olx.co.id/v1/files/686f2dbc0e44d-ID/image;s=780x0;q=60',
+    'https://apollo.olx.co.id/v1/files/686cff31f05c5-ID/image;s=780x0;q=60',
+    'https://apollo.olx.co.id/v1/files/68a549775ae8b-ID/image;s=780x0;q=60']
   return kosanArray.map((kosan, index) => {
     return {
-      id: `${Date.now()}-${index}`, // unique id
-      url: `/images/${kosan.name.replace(/\s+/g, "-").toLowerCase()}.jpg`,
+      id: kosan.id, // unique id
+      url: kosan.images[0],
       title: kosan.name,
       price: `Rp ${kosan.price.toLocaleString("id-ID")}`, // formatted price
       description: `${kosan.facility} - ${kosan.location}`,
@@ -58,7 +67,7 @@ export default function ChatPage() {
       id: "1",
       sender: "bot",
       content:
-        "Hai bro,\n\nKalau kamu mau nanya - nanya seputar Kostan, Kontrakan, dan apartment tinggal tanya aja ya pakai textbox dibawah ini. Saat ini info yang tersedia hanya bertempat di Jakarta, tapi kedepannya kita bakal perbanyak lokasi di kota - kota lain. Aku juga mau kasih tau kalau aku belum tentu benar dan masih bisa salah jadi double check semuanya ya !",
+        "If you want to ask anything about boarding houses, rentals, or apartments, just use the textbox below. Right now the available info is only for Jabodetabek, but in the future we’ll expand to more cities. I also want to let you know that I might not always be 100% correct, so please double-check everything!",
       timestamp: new Date("2025-07-19T15:15:08"),
     },
   ])
@@ -82,16 +91,18 @@ export default function ChatPage() {
     setIsLoading(true)
 
     try {
-      const response: ChatApiResponse = await axios.post("http://localhost:8001/chat/submit", {
+      const response = await axios.post(`${config.agentApiUrl}/chat/submit`, {
         text: inputMessage,
       });
-      console.log("response", response)
-      const images = processImages(response.resultArray)
+
+      const chatResponse: ChatApiResponse = response.data
+      console.log(chatResponse)
+      const images = chatResponse.resultArray ? processImages(chatResponse.resultArray) : []
 
       const botMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         sender: "bot",
-        content: response.result,
+        content: chatResponse.result,
         timestamp: new Date(),
         images: images,
       }
@@ -147,12 +158,12 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-[#1a1a1a] text-white relative">
+    <div className="flex h-screen w-full bg-[#0C0C0D] text-white relative">
       {/* Sidebar */}
       <aside
         className={`${
           sidebarExpanded ? "w-64" : "w-0"
-        } flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out bg-[#1a1a1a] overflow-hidden`}
+        } flex-shrink-0 flex flex-col transition-all duration-300 ease-in-out bg-[#0C0C0D] overflow-hidden`}
       >
         <div className="flex items-center justify-between p-4 min-h-[73px] min-w-64">
           <button
@@ -161,26 +172,12 @@ export default function ChatPage() {
           >
             <Menu className="h-6 w-6" />
           </button>
-          <RefreshCw className="h-6 w-6 text-gray-400 flex-shrink-0" />
         </div>
 
-        <div className="p-4 text-sm text-gray-400 min-w-64">Belum ada lokasi tersimpan</div>
+        <div className="p-4 text-sm text-gray-400 min-w-64">No saved location yet</div>
 
         <div className="mt-auto p-4 text-xs text-gray-500 min-w-64">
-          <p className="mb-1">
-            <a href="#" className="text-green-500 hover:underline">
-              Privacy
-            </a>{" "}
-            •{" "}
-            <a href="#" className="text-green-500 hover:underline">
-              Terms
-            </a>{" "}
-            •{" "}
-            <a href="#" className="text-green-500 hover:underline">
-              Feedback
-            </a>
-          </p>
-          <p>© 2025 — Yuugen Lab. All Rights Reserved</p>
+          <p>© 2025 — Kringing Network. All Rights Reserved</p>
         </div>
       </aside>
 
@@ -207,13 +204,6 @@ export default function ChatPage() {
             )}
             <h1 className="text-lg font-semibold">Pintrail</h1>
           </div>
-
-          {/* TrailToken Balance */}
-          <div className="flex items-center space-x-2 bg-[#2a2a2a] px-3 py-2 rounded-lg border border-[#333333]">
-            <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
-            <span className="text-sm text-gray-300">TrailToken:</span>
-            <span className="text-sm font-semibold text-green-400">{trailTokenBalance.toLocaleString()}</span>
-          </div>
         </header>
 
         {/* Horizontal Border Line */}
@@ -223,13 +213,26 @@ export default function ChatPage() {
         <div className="flex-grow p-6 overflow-y-auto">
           {messages.map((message) => (
             <div key={message.id} className="flex items-start space-x-4 mb-6">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#333333] flex items-center justify-center">
-                <Home className="h-5 w-5 text-gray-400" />
+              {/* Avatar */}
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#333333] flex items-center justify-center overflow-hidden">
+                <img
+                  src={message.sender === "bot" ? "/pintrail.png" : "/placeholder-user.jpg"}
+                  alt={message.sender === "bot" ? "Pintrail Logo" : "User Avatar"}
+                  className="w-12 h-12 object-contain"
+                />
               </div>
+
+              {/* Message Content */}
               <div className="flex-grow">
-                <div className="font-semibold">{message.sender === "bot" ? "Pintrail" : "You"}</div>
-                <div className="text-xs text-gray-400 mb-2">{formatTimestamp(message.timestamp)}</div>
-                <div className="text-sm whitespace-pre-line mb-4">{message.content}</div>
+                <div className="font-semibold">
+                  {message.sender === "bot" ? "Pintrail" : "You"}
+                </div>
+                <div className="text-xs text-gray-400 mb-2">
+                  {formatTimestamp(message.timestamp)}
+                </div>
+                <div className="text-sm whitespace-pre-line mb-4">
+                  {message.content}
+                </div>
 
                 {/* Property Images Grid */}
                 {message.images && message.images.length > 0 && (
@@ -246,9 +249,15 @@ export default function ChatPage() {
                           className="w-full h-32 object-cover"
                         />
                         <div className="p-2">
-                          <h4 className="text-xs font-medium text-white truncate">{image.title}</h4>
-                          <p className="text-xs text-green-400 font-semibold">{image.price}</p>
-                          <p className="text-xs text-gray-400 truncate">{image.description}</p>
+                          <h4 className="text-xs font-medium text-white truncate">
+                            {image.title}
+                          </h4>
+                          <p className="text-xs text-green-400 font-semibold">
+                            {image.price}
+                          </p>
+                          <p className="text-xs text-gray-400 truncate">
+                            {image.description}
+                          </p>
                         </div>
                       </div>
                     ))}
@@ -261,8 +270,12 @@ export default function ChatPage() {
           {/* Loading indicator */}
           {isLoading && (
             <div className="flex items-start space-x-4 mb-6">
-              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#333333] flex items-center justify-center">
-                <Home className="h-5 w-5 text-gray-400" />
+              <div className="flex-shrink-0 w-10 h-10 rounded-full bg-[#333333] flex items-center justify-center overflow-hidden">
+                <img
+                  src={"/pintrail.png"}
+                  alt={"Pintrail Loading Logo"}
+                  className="w-12 h-12 object-contain"
+                />
               </div>
               <div>
                 <div className="font-semibold">Pintrail</div>
@@ -306,3 +319,4 @@ export default function ChatPage() {
     </div>
   )
 }
+

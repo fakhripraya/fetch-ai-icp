@@ -1,7 +1,9 @@
 from uagents import Agent, Context
 import time
-from domain.entities.rest.rest import Request, Response
-from utils.functions import process_query
+from domain.entities.rest.rest import Request, Response,RequestIdKosan,ResponseGetKosan
+
+
+from utils.functions import process_query,call_get_kosan
 
 agent = Agent(
     name='test-ICP-agent',
@@ -31,5 +33,25 @@ async def handle_submit_chat(ctx: Context, req: Request) -> Response:
             timestamp=int(time.time()),
         )
 
+
+@agent.on_rest_post("/kosan", RequestIdKosan,ResponseGetKosan)
+async def handle_submit_chat(ctx: Context, req: RequestIdKosan) -> ResponseGetKosan:
+    ctx.logger.info(f"Received POST request with id: {req.idKosan}")
+    try:
+        # Call your LLM + tool process pipeline
+        response= await call_get_kosan(req.idKosan, ctx)
+        ctx.logger.info(f"res {response}")
+        return ResponseGetKosan(
+            result=response,
+            agent_address=ctx.agent.address,
+            timestamp=int(time.time()),
+        )
+    except Exception as e:
+        ctx.logger.error(f"Error in kosan: {str(e)}")
+        return ResponseGetKosan(
+            text=f"Error: {str(e)}",
+            agent_address=ctx.agent.address,
+            timestamp=int(time.time()),
+        )
 if __name__ == "__main__":
     agent.run()
