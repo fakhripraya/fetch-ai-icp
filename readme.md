@@ -36,13 +36,15 @@ This project requires **Python 3.10** and **Node.js**.
 
 ## Step 2: Start Fetch AI Agent
 
-1. Navigate to the `fetch-ai-agent/backend/domain` folder and edit the configuration file.
+1. Navigate to the fetch-ai-agent/backend/ directory, create a .env file, and configure it using the values provided in the .env.example file.
 
 2. Update the following variables:
 
    * `CANISTER_URI` → set this to the deployed canister URI
    * `CANISTER_ID` → set this to the deployed canister ID
    * `ASI1_API_KEY` → set this with your **ASI One API Key**
+   * `ASI1_BASE_URL` → set this URL ASI1
+   * `BASE_URL` → set this URL canister
 
 3. Go to the backend folder:
 
@@ -66,13 +68,20 @@ This project requires **Python 3.10** and **Node.js**.
    cd fetch-ai-agent/frontend
    ```
 
+2. Navigate to the fetch-ai-agent/frontend directory, create a .env file, and configure it using the values provided in the .env.example file.
+
+3. Update the following variables:
+
+   * `NEXT_PUBLIC_AGENT_API_URL` → set this to posting data to API URL(its get from fetch-ai-agent/backend)
+
+
 2. Install dependencies:
 
    ```bash
    npm install
    ```
 
-3. Start the development server:
+4. Start the development server:
 
    ```bash
    npm run dev
