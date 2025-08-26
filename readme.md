@@ -88,6 +88,8 @@ This project requires **Python 3.10** and **Node.js**.
    ```
 
 ---
+## Important things
+* Fetch AI agent address: test-agent://agent1qgpxk8mkgmrmtvathm00la928h7nxh7pflzsn67pp20f7tcg9s4usg3ltu8
 
 ## Notes
 
