@@ -1,3 +1,5 @@
+![tag:innovationlab](https://img.shields.io/badge/innovationlab-3D8BD3)
+
 # Project Setup
 
 This project requires **Python 3.10** and **Node.js**.
